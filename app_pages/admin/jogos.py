@@ -22,9 +22,12 @@ st.subheader("Importação inicial via CSV")
 st.caption(
     "Colunas esperadas: selecao_1, selecao_2, data (AAAA-MM-DD ou DD/MM/AAAA), "
     "horario (HH:MM), grupo (opcional) e etapa (Fase de Grupos, Segunda Fase, "
-    "Oitavas de Final, Quartas de Final, Semifinal, Disputa de 3º Lugar ou Final). "
-    "Reenviar o arquivo atualiza data/hora e grupo dos jogos já cadastrados "
-    "(mesmo confronto e etapa) em vez de duplicá-los."
+    "Oitavas de Final, Quartas de Final, Semifinal, Disputa de 3º Lugar ou Final)."
+)
+st.warning(
+    "Importar este arquivo **apaga todos os jogos cadastrados atualmente** "
+    "(inclusive resultados já lançados e os palpites associados) e cadastra "
+    "apenas os jogos do CSV enviado."
 )
 
 upload_key = f"upload_jogos_{st.session_state.get('_upload_jogos_versao', 0)}"
@@ -41,10 +44,14 @@ if arquivo is not None:
     else:
         st.success(f"{len(preview.rows)} jogo(s) prontos para importar.")
         st.dataframe(preview.preview, width="stretch", hide_index=True)
-        if st.button("Importar jogos", type="primary"):
+        confirmar = st.checkbox(
+            "Confirmo que desejo apagar todos os jogos cadastrados "
+            "(incluindo resultados e palpites associados) e importar este arquivo."
+        )
+        if st.button("Importar jogos", type="primary", disabled=not confirmar):
             matches_service.import_matches(client, profile.id, preview.rows)
             st.session_state["_upload_jogos_versao"] = st.session_state.get("_upload_jogos_versao", 0) + 1
-            st.success("Jogos importados/atualizados com sucesso.")
+            st.success("Jogos importados com sucesso (calendário substituído).")
             st.rerun()
 
 st.subheader("Jogos cadastrados")

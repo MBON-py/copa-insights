@@ -1,9 +1,6 @@
-from collections import defaultdict
-
 from supabase import Client
 
 from core.constants import StatusJogo
-from core.csv_utils import normalizar
 from models.match import Match
 
 
@@ -13,41 +10,20 @@ def list_all(client: Client) -> list[Match]:
     return [Match.model_validate(row) for row in response.data]
 
 
-def upsert_many(client: Client, rows: list[dict]) -> list[Match]:
-    """Insere jogos novos e atualiza data/hora e grupo dos já cadastrados (PDR §10).
+def replace_all(client: Client, rows: list[dict]) -> tuple[int, list[Match]]:
+    """Apaga todos os jogos cadastrados e insere os jogos do CSV (PDR §10).
 
-    Cada linha é casada com um jogo existente por (selecao_1, selecao_2,
-    etapa) normalizados; se houver exatamente um jogo correspondente, sua
-    `data_hora`/`grupo` são atualizados (status e placar são preservados).
-    Caso contrário (jogo novo, ou chave ambígua), a linha é inserida. Evita
-    duplicar o calendário quando o CSV de importação inicial é reenviado.
+    A FK predictions.match_id possui ON DELETE CASCADE, portanto apagar os
+    jogos remove em cascata os palpites e placares já lançados. Usado para
+    reimportar o calendário do zero a cada upload do CSV de importação
+    inicial, evitando duplicação. Retorna a quantidade de jogos removidos e
+    os jogos inseridos.
     """
-    existentes: dict[tuple[str, str, str], list[Match]] = defaultdict(list)
-    for match in list_all(client):
-        chave = (normalizar(match.selecao_1), normalizar(match.selecao_2), normalizar(match.etapa.value))
-        existentes[chave].append(match)
+    removidos = len(list_all(client))
+    client.table("matches").delete().neq("id", 0).execute()
 
-    novos: list[dict] = []
-    resultado: list[Match] = []
-    for row in rows:
-        chave = (normalizar(row["selecao_1"]), normalizar(row["selecao_2"]), normalizar(row["etapa"]))
-        candidatos = existentes.get(chave, [])
-        if len(candidatos) == 1:
-            response = (
-                client.table("matches")
-                .update({"data_hora": row["data_hora"], "grupo": row["grupo"]})
-                .eq("id", candidatos[0].id)
-                .execute()
-            )
-            resultado.append(Match.model_validate(response.data[0]))
-        else:
-            novos.append(row)
-
-    if novos:
-        response = client.table("matches").insert(novos).execute()
-        resultado.extend(Match.model_validate(row) for row in response.data)
-
-    return resultado
+    response = client.table("matches").insert(rows).execute()
+    return removidos, [Match.model_validate(row) for row in response.data]
 
 
 def update_result(client: Client, match_id: int, gols_1: int, gols_2: int) -> Match:

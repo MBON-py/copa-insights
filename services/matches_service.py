@@ -126,14 +126,16 @@ def parse_csv(file: BytesIO) -> ImportPreview:
 
 
 def import_matches(client: Client, user_id: str, rows: list[dict[str, Any]]) -> list[Match]:
-    """Insere/atualiza os jogos validados e registra a importação na auditoria (PDR §18).
+    """Apaga todos os jogos cadastrados e insere os jogos do CSV, registrando a importação na auditoria (PDR §18).
 
-    Jogos já cadastrados (mesmo confronto e etapa) têm data/hora e grupo
-    atualizados; jogos novos são inseridos. Permite reenviar o CSV de
-    importação inicial sem duplicar o calendário.
+    Apagar os jogos remove em cascata os palpites e placares já lançados.
+    Permite reenviar o CSV de importação inicial sem duplicar o calendário,
+    sempre substituindo o conteúdo anterior pelo do arquivo enviado.
     """
-    matches = matches_repo.upsert_many(client, rows)
-    audit_service.log_action(client, user_id, "importacao_jogos", {"quantidade": len(matches)})
+    removidos, matches = matches_repo.replace_all(client, rows)
+    audit_service.log_action(
+        client, user_id, "importacao_jogos", {"jogos_removidos": removidos, "jogos_importados": len(matches)}
+    )
     return matches
 
 
