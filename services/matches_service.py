@@ -126,8 +126,13 @@ def parse_csv(file: BytesIO) -> ImportPreview:
 
 
 def import_matches(client: Client, user_id: str, rows: list[dict[str, Any]]) -> list[Match]:
-    """Insere os jogos validados e registra a importação na auditoria (PDR §18)."""
-    matches = matches_repo.insert_many(client, rows)
+    """Insere/atualiza os jogos validados e registra a importação na auditoria (PDR §18).
+
+    Jogos já cadastrados (mesmo confronto e etapa) têm data/hora e grupo
+    atualizados; jogos novos são inseridos. Permite reenviar o CSV de
+    importação inicial sem duplicar o calendário.
+    """
+    matches = matches_repo.upsert_many(client, rows)
     audit_service.log_action(client, user_id, "importacao_jogos", {"quantidade": len(matches)})
     return matches
 

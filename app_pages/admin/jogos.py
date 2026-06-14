@@ -22,7 +22,9 @@ st.subheader("Importação inicial via CSV")
 st.caption(
     "Colunas esperadas: selecao_1, selecao_2, data (AAAA-MM-DD ou DD/MM/AAAA), "
     "horario (HH:MM), grupo (opcional) e etapa (Fase de Grupos, Segunda Fase, "
-    "Oitavas de Final, Quartas de Final, Semifinal, Disputa de 3º Lugar ou Final)."
+    "Oitavas de Final, Quartas de Final, Semifinal, Disputa de 3º Lugar ou Final). "
+    "Reenviar o arquivo atualiza data/hora e grupo dos jogos já cadastrados "
+    "(mesmo confronto e etapa) em vez de duplicá-los."
 )
 
 upload_key = f"upload_jogos_{st.session_state.get('_upload_jogos_versao', 0)}"
@@ -42,7 +44,7 @@ if arquivo is not None:
         if st.button("Importar jogos", type="primary"):
             matches_service.import_matches(client, profile.id, preview.rows)
             st.session_state["_upload_jogos_versao"] = st.session_state.get("_upload_jogos_versao", 0) + 1
-            st.success("Jogos importados com sucesso.")
+            st.success("Jogos importados/atualizados com sucesso.")
             st.rerun()
 
 st.subheader("Jogos cadastrados")
