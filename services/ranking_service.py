@@ -39,7 +39,7 @@ def get_premiacao(ranking: list[RankingEntry]) -> Premiacao:
     prêmio de 2º lugar distribuído.
     """
     vencedores = [
-        (entry.posicao, entry.nome_completo, PREMIOS[entry.posicao])
+        (entry.posicao, entry.nickname, PREMIOS[entry.posicao])
         for entry in ranking
         if entry.posicao in PREMIOS
     ]

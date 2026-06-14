@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class RankingEntry(BaseModel):
     user_id: str
-    nome_completo: str
+    nickname: str
     pontos_total: int
     placares_exatos: int
     acertos_vencedor: int

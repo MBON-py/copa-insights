@@ -58,7 +58,7 @@ with st.sidebar:
 if session.is_authenticated():
     profile = session.get_profile()
     with st.sidebar:
-        st.markdown(f"**{profile.nome_completo}**")
+        st.markdown(f"**{profile.nickname}**")
         st.caption(f"{profile.email} · {profile.perfil.value.capitalize()}")
         if st.button("Sair", icon=":material/logout:", width="stretch"):
             auth_service.sign_out(get_client())

@@ -35,7 +35,7 @@ else:
         for entry in top3:
             with st.container(border=True):
                 st.markdown(f"#### {_MEDALHAS.get(entry.posicao, '')} {entry.posicao}º lugar")
-                st.markdown(f"**{entry.nome_completo}**")
+                st.markdown(f"**{entry.nickname}**")
                 st.caption(f"{entry.pontos_total} pontos")
                 st.markdown(formatar_reais(premios.get(entry.posicao, 0.0)))
 
@@ -43,7 +43,7 @@ st.subheader("Ranking geral")
 if not ranking:
     st.info("Nenhum participante no ranking ainda.")
 else:
-    tabela = pd.DataFrame([{"Nome": entry.nome_completo, "Pontos": entry.pontos_total} for entry in ranking])
+    tabela = pd.DataFrame([{"Nome": entry.nickname, "Pontos": entry.pontos_total} for entry in ranking])
     figura = px.bar(tabela, x="Pontos", y="Nome", orientation="h")
     figura.update_yaxes(autorange="reversed", title=None)
     st.plotly_chart(figura)

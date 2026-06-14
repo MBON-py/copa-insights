@@ -8,7 +8,7 @@ st.title("Entrar")
 
 if session.is_authenticated():
     profile = session.get_profile()
-    st.success(f"Você já está logado como **{profile.nome_completo}**.")
+    st.success(f"Você já está logado como **{profile.nickname}**.")
     st.stop()
 
 client = get_client()
@@ -104,6 +104,7 @@ with tab_entrar:
 with tab_cadastrar:
     with st.form("cadastro_form"):
         nome_completo = st.text_input("Nome completo")
+        apelido = st.text_input("Apelido", help="Como seu nome vai aparecer no ranking e nos dashboards.")
         telefone = st.text_input("Telefone")
         email_cadastro = st.text_input("E-mail", key="cadastro_email")
         senha_cadastro = st.text_input("Senha", type="password", key="cadastro_senha")
@@ -112,7 +113,7 @@ with tab_cadastrar:
         )
         cadastrar = st.form_submit_button("Cadastrar", type="primary")
     if cadastrar:
-        if not all([nome_completo, telefone, email_cadastro, senha_cadastro]):
+        if not all([nome_completo, apelido, telefone, email_cadastro, senha_cadastro]):
             st.error("Preencha todos os campos.")
         elif "@" not in email_cadastro:
             st.error("Informe um e-mail válido.")
@@ -121,7 +122,7 @@ with tab_cadastrar:
         elif senha_cadastro != confirmar_senha_cadastro:
             st.error("As senhas não coincidem.")
         else:
-            result = auth_service.sign_up(client, email_cadastro, senha_cadastro, nome_completo, telefone)
+            result = auth_service.sign_up(client, email_cadastro, senha_cadastro, nome_completo, apelido, telefone)
             if result.success:
                 st.success(result.message)
             else:

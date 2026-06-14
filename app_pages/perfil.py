@@ -14,6 +14,7 @@ if profile is None:
 client = get_client()
 
 st.text_input("Nome completo", value=profile.nome_completo, disabled=True)
+st.text_input("Apelido", value=profile.nickname, disabled=True)
 st.text_input("E-mail", value=profile.email, disabled=True)
 st.text_input("Perfil", value=profile.perfil.value.capitalize(), disabled=True)
 

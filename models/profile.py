@@ -8,6 +8,7 @@ from core.constants import Perfil
 class Profile(BaseModel):
     id: str
     nome_completo: str
+    nickname: str
     email: str
     telefone: str
     perfil: Perfil

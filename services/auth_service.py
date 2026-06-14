@@ -13,7 +13,9 @@ class AuthResult:
     user_id: str | None = None
 
 
-def sign_up(client: Client, email: str, password: str, nome_completo: str, telefone: str) -> AuthResult:
+def sign_up(
+    client: Client, email: str, password: str, nome_completo: str, nickname: str, telefone: str
+) -> AuthResult:
     """Cadastra um novo usuário. O profile é criado automaticamente por trigger."""
     try:
         client.auth.sign_up(
@@ -21,7 +23,7 @@ def sign_up(client: Client, email: str, password: str, nome_completo: str, telef
                 "email": email,
                 "password": password,
                 "options": {
-                    "data": {"nome_completo": nome_completo, "telefone": telefone},
+                    "data": {"nome_completo": nome_completo, "nickname": nickname, "telefone": telefone},
                     "email_redirect_to": settings.app_url,
                 },
             }

@@ -39,7 +39,7 @@ else:
         [
             {
                 "Posição": f"{_MEDALHAS.get(entry.posicao, '')} {entry.posicao}º".strip(),
-                "Nome": entry.nome_completo,
+                "Apelido": entry.nickname,
                 "Pontos": entry.pontos_total,
                 "Placares exatos": entry.placares_exatos,
                 "Acertos de vencedor": entry.acertos_vencedor,
