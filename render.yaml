@@ -1,0 +1,31 @@
+# Blueprint do Render (https://render.com/docs/blueprint-spec)
+#
+# Cria um Web Service Docker (Dockerfile na raiz do repositório) para o
+# Copa Insights. O banco de dados não faz parte deste blueprint — é o
+# Postgres do Supabase (cloud), configurado via variáveis de ambiente.
+#
+# Uso: no Render, "New +" -> "Blueprint", selecione este repositório.
+# As variáveis marcadas com "sync: false" precisam ser preenchidas
+# manualmente no dashboard do Render (não ficam versionadas no Git).
+services:
+  - type: web
+    name: mestredospalpites
+    runtime: docker
+    plan: free
+    healthCheckPath: /_stcore/health
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: APP_ENV
+        value: production
+      - key: APP_NAME
+        value: Mestre dos Palpites
+      # Domínio próprio (www como canônico, com mestredospalpites.com.br
+      # redirecionando para ele) — configurado em Settings -> Custom Domains
+      # do serviço. Ver seção "Deploy no Render" do README.
+      - key: APP_URL
+        value: https://www.mestredospalpites.com.br

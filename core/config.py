@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     supabase_key: str
     supabase_service_role_key: str | None = None
     app_env: str = "development"
-    app_name: str = "Copa Insights"
+    app_name: str = "Mestre dos Palpites"
     app_url: str = "http://localhost:8501"
 
 

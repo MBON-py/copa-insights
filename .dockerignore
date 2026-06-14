@@ -1,0 +1,12 @@
+.git/
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+.claude/
+.agents/
+.llm/
+.mcp.json
+skills-lock.json
+logs/

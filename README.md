@@ -115,6 +115,71 @@ app em [http://localhost:8501](http://localhost:8501). O arquivo `.env` é
 carregado via `env_file` no `docker-compose.yml`. Não há serviço de banco no
 compose — o Postgres é o do Supabase (cloud).
 
+## Deploy no Render
+
+A aplicação é publicada como um **Web Service Docker** no
+[Render](https://render.com), usando o [`Dockerfile`](Dockerfile) da raiz. O
+banco de dados continua sendo o Supabase — não há serviço de banco no Render.
+O container lê a porta da variável `PORT` (definida automaticamente pelo
+Render) e expõe `/_stcore/health` para o health check. Em produção, o app é
+acessado pelo domínio próprio `www.mestredospalpites.com.br` e é exibido como
+"Mestre dos Palpites" (`APP_NAME`).
+
+### Opção 1 — Blueprint (`render.yaml`)
+
+1. No Render, **New +** → **Blueprint** e selecione este repositório. O
+   Render lê o [`render.yaml`](render.yaml) e cria o Web Service
+   `mestredospalpites` automaticamente (runtime Docker, plano Free, health
+   check `/_stcore/health`, `APP_NAME=Mestre dos Palpites` e
+   `APP_URL=https://www.mestredospalpites.com.br`).
+2. Preencha as variáveis marcadas como obrigatórias no dashboard
+   (`SUPABASE_URL`, `SUPABASE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) — ver a
+   tabela de variáveis em [Configuração local](#configuração-local).
+3. Configure o domínio próprio (ver "Domínio próprio" abaixo). Até lá, o
+   serviço também responde em `https://mestredospalpites.onrender.com`.
+
+### Opção 2 — Web Service manual
+
+1. **New +** → **Web Service** → conecte este repositório.
+2. **Name**: `mestredospalpites`.
+3. **Runtime**: Docker.
+4. **Plan**: Free (ou superior).
+5. **Health Check Path**: `/_stcore/health`.
+6. Configure as variáveis de ambiente da tabela em
+   [Configuração local](#configuração-local), com `APP_ENV=production`,
+   `APP_NAME=Mestre dos Palpites` e `APP_URL=https://www.mestredospalpites.com.br`.
+
+### Domínio próprio (mestredospalpites.com.br)
+
+O domínio canônico é `www.mestredospalpites.com.br`, com o domínio raiz
+(`mestredospalpites.com.br`) redirecionando para ele:
+
+1. No serviço `mestredospalpites`, vá em **Settings → Custom Domains** →
+   **Add Custom Domain**.
+2. Adicione `www.mestredospalpites.com.br` — o Render mostra um registro
+   **CNAME** para criar no provedor de DNS do domínio, apontando para o host
+   `*.onrender.com` do serviço.
+3. Adicione também `mestredospalpites.com.br` (raiz) — como domínios raiz não
+   aceitam CNAME, o Render indica um registro **ALIAS/ANAME** (ou **A**,
+   dependendo do provedor de DNS).
+4. Na própria página de Custom Domains, marque `www.mestredospalpites.com.br`
+   como domínio primário e configure `mestredospalpites.com.br` para
+   redirecionar para ele.
+5. A propagação do DNS pode levar de minutos a algumas horas; o Render valida
+   os registros e emite o certificado TLS (Let's Encrypt) automaticamente.
+
+### Pós-deploy: redirect URLs no Supabase
+
+Repita o passo 4 de [Configuração local](#configuração-local) com a URL de
+produção: no Supabase Dashboard, **Authentication → URL Configuration →
+Redirect URLs**, adicione `https://www.mestredospalpites.com.br/**`. Sem isso,
+os links de confirmação de cadastro e recuperação de senha enviados por e-mail
+em produção são rejeitados.
+
+> **Plano Free do Render**: o serviço "dorme" após um período de
+> inatividade; o primeiro acesso após esse período pode levar cerca de 1
+> minuto para responder (cold start).
+
 ## Banco de dados (Supabase)
 
 O schema (tabelas, views, funções de pontuação, triggers e políticas de RLS)
@@ -172,5 +237,18 @@ que se reorganizam em telas estreitas) em `Classificação`, `Dashboard geral`
 e `Meu desempenho`; e a nova página `Admin → Usuários`, que lista
 participantes/administradores, permite ativar/desativar participantes e
 promover/rebaixar administradores (via `service_role key`, com aviso sobre a
-necessidade de renovação do token de sessão para o usuário afetado). Próxima
-fase: deploy.
+necessidade de renovação do token de sessão para o usuário afetado); e
+apelido (nickname) do usuário: novo campo obrigatório e único em
+`profiles`, coletado no cadastro junto do nome completo — o nome completo
+fica restrito ao cadastro, enquanto o apelido (mais curto) é o nome de
+exibição em toda a aplicação (sidebar, `Meu perfil`, `Classificação` e
+`Dashboard geral`/Top 3), com `v_ranking` atualizada para expor `nickname`; e
+preparação para deploy no Render (PDR §20): `Dockerfile` ajustado para ler a
+porta de `$PORT` (definida pelo Render) com fallback para 8501 e healthcheck
+em Python (a imagem `python:3.12-slim` não inclui `curl`), `.dockerignore`
+para reduzir o contexto de build, `render.yaml` (Blueprint de Web Service
+Docker, plano Free, health check em `/_stcore/health`) e a seção
+"Deploy no Render" no README com o passo a passo (Blueprint ou Web Service
+manual, variáveis de ambiente e atualização das redirect URLs do Supabase
+Auth em produção). A publicação em si requer conectar este repositório a uma
+conta no Render — não realizada neste ambiente.
