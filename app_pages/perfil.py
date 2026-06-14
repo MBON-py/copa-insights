@@ -29,4 +29,3 @@ if salvar:
         updated_profile = profile_service.update_telefone(client, profile.id, telefone.strip())
         session.set_profile(updated_profile)
         st.success("Telefone atualizado com sucesso.")
-        st.rerun()
