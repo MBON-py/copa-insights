@@ -21,8 +21,8 @@ client = get_client()
 st.subheader("Importação inicial via CSV")
 st.caption(
     "Colunas esperadas: selecao_1, selecao_2, data (AAAA-MM-DD ou DD/MM/AAAA), "
-    "horario (HH:MM), grupo (opcional) e etapa (Fase de Grupos, Oitavas de Final, "
-    "Quartas de Final, Semifinal, Disputa de 3º Lugar ou Final)."
+    "horario (HH:MM), grupo (opcional) e etapa (Fase de Grupos, Segunda Fase, "
+    "Oitavas de Final, Quartas de Final, Semifinal, Disputa de 3º Lugar ou Final)."
 )
 
 upload_key = f"upload_jogos_{st.session_state.get('_upload_jogos_versao', 0)}"

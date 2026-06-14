@@ -8,6 +8,7 @@ class Perfil(StrEnum):
 
 class Etapa(StrEnum):
     FASE_DE_GRUPOS = "Fase de Grupos"
+    SEGUNDA_FASE = "Segunda Fase"
     OITAVAS_DE_FINAL = "Oitavas de Final"
     QUARTAS_DE_FINAL = "Quartas de Final"
     SEMIFINAL = "Semifinal"
